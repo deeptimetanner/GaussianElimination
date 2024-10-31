@@ -124,18 +124,22 @@ A = [[2.0, 3.0, -1.0],
      [4.0, 1.0, 2.0],
      [-2.0, 7.0, 2.0]]
 
-# Python version
-use_c = False
-P, L, U = plu(A, use_c=use_c)
+# Python PLU decomposition with pivoting (plu function)
+P, L, U = plu(A, use_c=False)
 print("Python PLU Decomposition:")
 print("P:", P)
 print("L:", L)
 print("U:", U)
 
-# C version
-use_c = True
+# Python LU decomposition without pivoting (lu function)
+L, U = lu(A)
+print("\nPython LU Decomposition:")
+print("L:", L)
+print("U:", U)
+
+# C implementation for PLU decomposition with pivoting
 try:
-    P, L, U = plu(A, use_c=use_c)
+    P, L, U = plu(A, use_c=True)
     print("\nC PLU Decomposition:")
     print("P:", P)
     print("L:", L)
