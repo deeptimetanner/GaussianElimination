@@ -27,5 +27,6 @@ void   generate_random_matrix(int n, double matrix[n][n]);
 void   create_matrix(int n, double (**matrix)[n]);
 void   destroy_matrix(int n, double (*matrix)[n]);
 void   copy_matrix(int n, const double A[n][n], double A_copy[n][n]);
+void   plu(int n, double A[n][n], int P[n]);
 
 #endif

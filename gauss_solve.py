@@ -1,98 +1,108 @@
-#----------------------------------------------------------------
-# File:     gauss_solve.py
-#----------------------------------------------------------------
-#
-# Author:   Marek Rychlik (rychlik@arizona.edu)
-# Date:     Thu Sep 26 10:38:32 2024
-# Copying:  (C) Marek Rychlik, 2020. All rights reserved.
-# 
-#----------------------------------------------------------------
-# A Python wrapper module around the C library libgauss.so
+import numpy as np
+from ctypes import CDLL, POINTER, c_int, c_double, byref
+import os
 
-import ctypes
+class NoImplementationInC(Exception):
+    """Exception raised if the C implementation is requested but unavailable."""
+    pass
 
-gauss_library_path = './libgauss.so'
+def plu(A, use_c=False):
+    """Perform PLU decomposition with partial pivoting.
 
-def unpack(A):
-    """ Extract L and U parts from A, fill with 0's and 1's """
-    n = len(A)
-    L = [[A[i][j] for j in range(i)] + [1] + [0 for j in range(i+1, n)]
-         for i in range(n)]
+    Args:
+        A (list of list of floats): The matrix to decompose.
+        use_c (bool): If True, try to use the C implementation. Defaults to False.
 
-    U = [[0 for j in range(i)] + [A[i][j] for j in range(i, n)]
-         for i in range(n)]
-
-    return L, U
-
-def lu_c(A):
-    """ Accepts a list of lists A of floats and
-    it returns (L, U) - the LU-decomposition as a tuple.
+    Returns:
+        tuple: (P, L, U) where
+            P (list of int): Permutation vector.
+            L (list of list of floats): Lower triangular matrix with 1s on the diagonal.
+            U (list of list of floats): Upper triangular matrix.
     """
-    # Load the shared library
-    lib = ctypes.CDLL(gauss_library_path)
-
-    # Create a 2D array in Python and flatten it
     n = len(A)
-    flat_array_2d = [item for row in A for item in row]
+    A_np = np.array(A, dtype=np.float64)
 
-    # Convert to a ctypes array
-    c_array_2d = (ctypes.c_double * len(flat_array_2d))(*flat_array_2d)
-
-    # Define the function signature
-    lib.lu_in_place.argtypes = (ctypes.c_int, ctypes.POINTER(ctypes.c_double))
-
-    # Modify the array in C (e.g., add 10 to each element)
-    lib.lu_in_place(n, c_array_2d)
-
-    # Convert back to a 2D Python list of lists
-    modified_array_2d = [
-        [c_array_2d[i * n + j] for j in range(n)]
-        for i in range(n)
-    ]
-
-    # Extract L and U parts from A, fill with 0's and 1's
-    return unpack(modified_array_2d)
-
-def lu_python(A):
-    n = len(A)
-    for k in range(n):
-        for i in range(k,n):
-            for j in range(k):
-                A[k][i] -= A[k][j] * A[j][i]
-        for i in range(k+1, n):
-            for j in range(k):
-                A[i][k] -= A[i][j] * A[j][k]
-            A[i][k] /= A[k][k]
-
-    return unpack(A)
-
-
-def lu(A, use_c=False):
     if use_c:
-        return lu_c(A)
+        # Load the C library if available
+        try:
+            lib = CDLL(os.path.join(os.getcwd(), "libgauss.so"))
+            c_plu = lib.plu
+            c_plu.argtypes = [c_int, POINTER(c_double * n * n), POINTER(c_int * n)]
+
+            # Convert A to a ctypes-compatible format
+            A_ctypes = (c_double * n * n)(*A_np.flatten())
+            P_ctypes = (c_int * n)(*range(n))
+
+            # Call the C function
+            c_plu(n, A_ctypes, P_ctypes)
+
+            # Convert the result back to Python types
+            P = list(P_ctypes)
+            A_decomposed = np.array(A_ctypes).reshape(n, n)
+
+            # Extract L and U from A_decomposed
+            L = np.tril(A_decomposed, -1) + np.eye(n)
+            U = np.triu(A_decomposed)
+
+            return P, L.tolist(), U.tolist()
+        
+        except Exception:
+            raise NoImplementationInC("C implementation not available or failed.")
+    
     else:
-        return lu_python(A)
+        # Python implementation of PLU decomposition
+        P = list(range(n))
+        L = np.zeros((n, n))
+        U = A_np.copy()
 
+        for k in range(n):
+            # Pivot
+            max_index = max(range(k, n), key=lambda i: abs(U[i][k]))
+            if U[max_index, k] == 0:
+                raise ValueError("Matrix is singular and cannot be decomposed.")
+            if max_index != k:
+                # Swap rows in U and P
+                U[[k, max_index]] = U[[max_index, k]]
+                P[k], P[max_index] = P[max_index], P[k]
+                L[[k, max_index]] = L[[max_index, k]]
 
+            # Compute entries of L and U
+            for i in range(k + 1, n):
+                L[i, k] = U[i, k] / U[k, k]
+                U[i, k:] -= L[i, k] * U[k, k:]
 
-if __name__ == "__main__":
+        # Fill diagonal of L with 1s
+        np.fill_diagonal(L, 1)
 
-    def get_A():
-        """ Make a test matrix """
-        A = [[2.0, 3.0, -1.0],
-             [4.0, 1.0, 2.0],
-             [-2.0, 7.0, 2.0]]
-        return A
+        return P, L.tolist(), U.tolist()
 
-    A = get_A()
+def lu(A):
+    """Perform LU decomposition without pivoting.
 
-    L, U = lu(A, use_c = False)
-    print(L)
-    print(U)
+    Args:
+        A (list of list of floats): The matrix to decompose.
 
-    # Must re-initialize A as it was destroyed
-    A = get_A()
+    Returns:
+        tuple: (L, U) where
+            L (list of list of floats): Lower triangular matrix with 1s on the diagonal.
+            U (list of list of floats): Upper triangular matrix.
+    """
+    n = len(A)
+    A_np = np.array(A, dtype=np.float64)
+    L = np.zeros((n, n))
+    U = A_np.copy()
 
-    L, U = lu(A, use_c=True)
-    print(L)
-    print(U)
+    for k in range(n):
+        # Check for zero pivot element
+        if U[k, k] == 0:
+            raise ValueError("Zero pivot encountered; matrix is singular or requires pivoting.")
+
+        # Compute entries of L and U
+        for i in range(k + 1, n):
+            L[i, k] = U[i, k] / U[k, k]
+            U[i, k:] -= L[i, k] * U[k, k:]
+
+    # Fill diagonal of L with 1s
+    np.fill_diagonal(L, 1)
+
+    return L.tolist(), U.tolist()

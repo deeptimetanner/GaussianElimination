@@ -8,6 +8,49 @@
 *
 *----------------------------------------------------------------*/
 #include "gauss_solve.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void plu(int n, double A[n][n], int P[n]) {
+    // Initialize permutation array P with identity permutation
+    for (int i = 0; i < n; i++) {
+        P[i] = i;
+    }
+
+    // Perform Gaussian elimination with partial pivoting
+    for (int k = 0; k < n; k++) {
+        // Pivoting
+        int max = k;
+        for (int i = k + 1; i < n; i++) {
+            if (fabs(A[i][k]) > fabs(A[max][k])) {
+                max = i;
+            }
+        }
+
+        // Swap rows in permutation array and in matrix A
+        if (max != k) {
+            int temp = P[k];
+            P[k] = P[max];
+            P[max] = temp;
+
+            for (int j = 0; j < n; j++) {
+                double tempVal = A[k][j];
+                A[k][j] = A[max][j];
+                A[max][j] = tempVal;
+            }
+        }
+
+        // Decomposition into L and U
+        for (int i = k + 1; i < n; i++) {
+            A[i][k] /= A[k][k]; // Compute L(i, k)
+            for (int j = k + 1; j < n; j++) {
+                A[i][j] -= A[i][k] * A[k][j]; // Update U(i, j)
+            }
+        }
+    }
+}
+
 
 void gauss_solve_in_place(const int n, double A[n][n], double b[n])
 {
