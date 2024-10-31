@@ -1,9 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory '/home/marek/GitProjects/Courses/Website/public/math589/LectureNotes/GaussianElimination'
-cc -std=c99 -fsignaling-nans -g -ggdb3 -O0   -c -o gauss_solve.o gauss_solve.c
-cc -std=c99 -fsignaling-nans -g -ggdb3 -O0   -c -o main.o main.c
-cc -std=c99 -fsignaling-nans -g -ggdb3 -O0   -c -o helpers.o helpers.c
-cc -std=c99 -fsignaling-nans -g -ggdb3 -O0 gauss_solve.o main.o helpers.o -o gauss_solve -lm
-gcc -shared -I/usr/include/python3.12 -o libgauss.so -fPIC gauss_solve.c
-make: Leaving directory '/home/marek/GitProjects/Courses/Website/public/math589/LectureNotes/GaussianElimination'
- 

@@ -1,49 +1,37 @@
-# Compiler flags
-CFLAGS=-std=c99
-CFLAGS+=-g -ggdb3
-#CFLAGS+= -O5
-CFLAGS+= -O0
-LDFLAGS=-lm
-PYTHON=python			# Name of Python executable
+# Compiler and flags
+CC = gcc
+CFLAGS = -std=c99 -g -ggdb3
+LDFLAGS = -lm
 
-# Target for building all components
-all: gauss_solve libgauss.so
+# Target executable
+TARGET = gauss_solve
 
-# Object files needed
+# Object files
 OBJS = gauss_solve.o main.o helpers.o
-gauss_solve.o : gauss_solve.h
-helpers.o: helpers.h
 
-# Build the main executable
-gauss_solve : $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
+# All target
+all: $(TARGET) libgauss.so
 
-# Check targets (if required by the autograder)
-check: check_gauss_solve check_ctype_wrapper
+# Linking the target executable
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
-check_gauss_solve: gauss_solve
-	./$<
+# Compile main.o, with gauss_solve.h and helpers.h as dependencies
+main.o: main.c gauss_solve.h helpers.h
+	$(CC) $(CFLAGS) -c main.c
 
-check_ctype_wrapper: gauss_solve.py libgauss.so
-	$(PYTHON) ./$<
+# Compile gauss_solve.o, with gauss_solve.h as dependency
+gauss_solve.o: gauss_solve.c gauss_solve.h
+	$(CC) $(CFLAGS) -c gauss_solve.c
 
-# Build the shared library for Python 3.10
-LIB_SOURCES = gauss_solve.c
+# Create shared library for the C implementation
 libgauss.so: gauss_solve.c
-	gcc -shared -I/usr/include/python3.10 -fPIC -o libgauss.so gauss_solve.c
+	$(CC) -shared -fPIC -o libgauss.so gauss_solve.c -lm
+
+# Compile helpers.o, with helpers.h as dependency
+helpers.o: helpers.c helpers.h
+	$(CC) $(CFLAGS) -c helpers.c
 
 # Clean up build files
-clean: FORCE
-	@-rm -f gauss_solve *.o *.so main
-
-FORCE:
-
-# Build the main executable and ensure the library is created
-main: main.o gauss_solve.o helpers.o
-	gcc -o main main.o gauss_solve.o helpers.o -L. -lgauss -lm
-
-main.o: main.c gauss_solve.h
-	gcc -c main.c
-
-gauss_solve.o: gauss_solve.c gauss_solve.h
-	gcc -c gauss_solve.c
+clean:
+	rm -f *.o $(TARGET) libgauss.so

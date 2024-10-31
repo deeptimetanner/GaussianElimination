@@ -23,32 +23,44 @@ def plu(A, use_c=False):
     A_np = np.array(A, dtype=np.float64)
 
     if use_c:
-        # Load the C library if available
+        # Attempt to load the C library and call the C plu function
         try:
-            lib = CDLL(os.path.join(os.getcwd(), "libgauss.so"))
-            c_plu = lib.plu
-            c_plu.argtypes = [c_int, POINTER(c_double * n * n), POINTER(c_int * n)]
+            lib_path = os.path.join(os.getcwd(), "libgauss.so")
+            lib = CDLL(lib_path)
+            print(f"Successfully loaded C library: {lib_path}")
 
-            # Convert A to a ctypes-compatible format
-            A_ctypes = (c_double * n * n)(*A_np.flatten())
+            # Set the function signature for `plu` in the shared library
+            c_plu = lib.plu
+            c_plu.argtypes = [c_int, POINTER(c_double * (n * n)), POINTER(c_int * n)]
+            c_plu.restype = None  # No return value for `plu`
+
+            # Prepare matrix A and permutation vector P for ctypes
+            A_ctypes = (c_double * (n * n))(*A_np.flatten())
             P_ctypes = (c_int * n)(*range(n))
 
-            # Call the C function
-            c_plu(n, A_ctypes, P_ctypes)
+            # Call the C function and handle any potential exceptions
+            try:
+                c_plu(n, A_ctypes, P_ctypes)
+                print("C function 'plu' executed successfully.")
 
-            # Convert the result back to Python types
-            P = list(P_ctypes)
-            A_decomposed = np.array(A_ctypes).reshape(n, n)
+                # Convert the result back to Python types
+                P = list(P_ctypes)
+                A_decomposed = np.array(A_ctypes).reshape(n, n)
 
-            # Extract L and U from A_decomposed
-            L = np.tril(A_decomposed, -1) + np.eye(n)
-            U = np.triu(A_decomposed)
+                # Extract L and U from A_decomposed
+                L = np.tril(A_decomposed, -1) + np.eye(n)
+                U = np.triu(A_decomposed)
 
-            return P, L.tolist(), U.tolist()
-        
-        except Exception:
-            raise NoImplementationInC("C implementation not available or failed.")
-    
+                return P, L.tolist(), U.tolist()
+            
+            except Exception as e:
+                print("Error calling C function 'plu':", e)
+                raise NoImplementationInC("C implementation not available or failed.")
+
+        except OSError as e:
+            print(f"Error loading C library 'libgauss.so': {e}")
+            raise NoImplementationInC("C library could not be loaded.")
+
     else:
         # Python implementation of PLU decomposition
         P = list(range(n))
@@ -106,3 +118,27 @@ def lu(A):
     np.fill_diagonal(L, 1)
 
     return L.tolist(), U.tolist()
+
+# Test Code
+A = [[2.0, 3.0, -1.0],
+     [4.0, 1.0, 2.0],
+     [-2.0, 7.0, 2.0]]
+
+# Python version
+use_c = False
+P, L, U = plu(A, use_c=use_c)
+print("Python PLU Decomposition:")
+print("P:", P)
+print("L:", L)
+print("U:", U)
+
+# C version
+use_c = True
+try:
+    P, L, U = plu(A, use_c=use_c)
+    print("\nC PLU Decomposition:")
+    print("P:", P)
+    print("L:", L)
+    print("U:", U)
+except NoImplementationInC as e:
+    print(e)

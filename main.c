@@ -7,6 +7,7 @@
 #include <fenv.h>
 #include "gauss_solve.h"
 #include "helpers.h"
+#include "gauss_solve.h"
 
 // Size of the matrix
 #define N 3

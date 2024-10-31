@@ -1,0 +1,27 @@
+---
+triple:          'x86_64-apple-darwin'
+binary-path:     test_gauss_solve
+relocations:
+  - { offsetInCU: 0x1E, offset: 0x1E, size: 0x8, addend: 0x0, symName: _fpe_handler, symObjAddr: 0x0, symBinAddr: 0x100000960, symSize: 0x30 }
+  - { offsetInCU: 0x39, offset: 0x39, size: 0x8, addend: 0x0, symName: _fpe_handler, symObjAddr: 0x0, symBinAddr: 0x100000960, symSize: 0x30 }
+  - { offsetInCU: 0x5D, offset: 0x5D, size: 0x8, addend: 0x0, symName: _test_plu, symObjAddr: 0x30, symBinAddr: 0x100000990, symSize: 0x140 }
+  - { offsetInCU: 0xE8, offset: 0xE8, size: 0x8, addend: 0x0, symName: _test_gauss_solve, symObjAddr: 0x170, symBinAddr: 0x100000AD0, symSize: 0x130 }
+  - { offsetInCU: 0x157, offset: 0x157, size: 0x8, addend: 0x0, symName: _main, symObjAddr: 0x2A0, symBinAddr: 0x100000C00, symSize: 0x44 }
+  - { offsetInCU: 0x1E, offset: 0x20F, size: 0x8, addend: 0x0, symName: _plu, symObjAddr: 0x0, symBinAddr: 0x100000C50, symSize: 0x2F0 }
+  - { offsetInCU: 0x2B, offset: 0x21C, size: 0x8, addend: 0x0, symName: _plu, symObjAddr: 0x0, symBinAddr: 0x100000C50, symSize: 0x2F0 }
+  - { offsetInCU: 0x167, offset: 0x358, size: 0x8, addend: 0x0, symName: _gauss_solve_in_place, symObjAddr: 0x2F0, symBinAddr: 0x100000F40, symSize: 0x280 }
+  - { offsetInCU: 0x233, offset: 0x424, size: 0x8, addend: 0x0, symName: _lu_in_place, symObjAddr: 0x570, symBinAddr: 0x1000011C0, symSize: 0x210 }
+  - { offsetInCU: 0x2F1, offset: 0x4E2, size: 0x8, addend: 0x0, symName: _lu_in_place_reconstruct, symObjAddr: 0x780, symBinAddr: 0x1000013D0, symSize: 0x1D4 }
+  - { offsetInCU: 0x1E, offset: 0x5F2, size: 0x8, addend: 0x0, symName: _matrix_times_vector, symObjAddr: 0x0, symBinAddr: 0x1000015B0, symSize: 0xC0 }
+  - { offsetInCU: 0x55, offset: 0x629, size: 0x8, addend: 0x0, symName: _matrix_times_vector, symObjAddr: 0x0, symBinAddr: 0x1000015B0, symSize: 0xC0 }
+  - { offsetInCU: 0xDB, offset: 0x6AF, size: 0x8, addend: 0x0, symName: _norm, symObjAddr: 0xC0, symBinAddr: 0x100001670, symSize: 0x70 }
+  - { offsetInCU: 0x13B, offset: 0x70F, size: 0x8, addend: 0x0, symName: _norm_dist, symObjAddr: 0x130, symBinAddr: 0x1000016E0, symSize: 0x90 }
+  - { offsetInCU: 0x1A9, offset: 0x77D, size: 0x8, addend: 0x0, symName: _frobenius_norm, symObjAddr: 0x1C0, symBinAddr: 0x100001770, symSize: 0xC0 }
+  - { offsetInCU: 0x225, offset: 0x7F9, size: 0x8, addend: 0x0, symName: _frobenius_norm_dist, symObjAddr: 0x280, symBinAddr: 0x100001830, symSize: 0x110 }
+  - { offsetInCU: 0x2AF, offset: 0x883, size: 0x8, addend: 0x0, symName: _print_vector, symObjAddr: 0x390, symBinAddr: 0x100001940, symSize: 0x60 }
+  - { offsetInCU: 0x2FD, offset: 0x8D1, size: 0x8, addend: 0x0, symName: _print_matrix, symObjAddr: 0x3F0, symBinAddr: 0x1000019A0, symSize: 0x260 }
+  - { offsetInCU: 0x41D, offset: 0x9F1, size: 0x8, addend: 0x0, symName: _generate_random_matrix, symObjAddr: 0x650, symBinAddr: 0x100001C00, symSize: 0xB0 }
+  - { offsetInCU: 0x487, offset: 0xA5B, size: 0x8, addend: 0x0, symName: _create_matrix, symObjAddr: 0x700, symBinAddr: 0x100001CB0, symSize: 0x40 }
+  - { offsetInCU: 0x4D5, offset: 0xAA9, size: 0x8, addend: 0x0, symName: _destroy_matrix, symObjAddr: 0x740, symBinAddr: 0x100001CF0, symSize: 0x30 }
+  - { offsetInCU: 0x515, offset: 0xAE9, size: 0x8, addend: 0x0, symName: _copy_matrix, symObjAddr: 0x770, symBinAddr: 0x100001D20, symSize: 0xA6 }
+...
