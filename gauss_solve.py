@@ -88,11 +88,12 @@ def plu(A, use_c=False):
 
         return P, L.tolist(), U.tolist()
 
-def lu(A):
+def lu(A, **kwargs):
     """Perform LU decomposition without pivoting.
 
     Args:
         A (list of list of floats): The matrix to decompose.
+        **kwargs: Accepts additional keyword arguments, such as `use_c`, but ignores them.
 
     Returns:
         tuple: (L, U) where
